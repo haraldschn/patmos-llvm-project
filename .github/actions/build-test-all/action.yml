@@ -21,18 +21,23 @@ inputs:
     description: 'Include tests, testing only the given. Should be a pipe-separated list.'
     required: true
     default: 'Patmos'
+  compiler-rt-flags:
+    description: 'Flags to use when compiling compiler-rt'
+    required: true
+    default: '--emit-static-lib -nodefaultlibs'
+  compiler-rt-tests:
+    description: 'Which folder under build-compiler-rt/test/builtins/Unit/ to test'
+    required: true
+    default: 'patmos'
         
 runs:
   using: "composite"
   steps: 
-    - run: echo "::group::Check Arguments"
+    - name: Create build folders
       shell: bash
-    - run: ${{(inputs.exclude-reg != '') || startsWith('|', inputs.exclude-reg)}}
-      shell: bash
-    - shell: bash
       run: |
-        echo "Creating Build Folder '$GITHUB_WORKSPACE/$BUILD_PATH'"
         mkdir -p $BUILD_PATH
+        mkdir -p $COMPILER_RT_BUILD_PATH
     - run: echo "::group::Configure LLVM Build"
       shell: bash
     - working-directory: ${{env.BUILD_PATH}}
@@ -48,7 +53,7 @@ runs:
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/$INSTALL_PATH \
           -DLLVM_TARGETS_TO_BUILD=$TARGETS \
           -DLLVM_DEFAULT_TARGET_TRIPLE=$DEFAULT_TARGET \
-          -DLLVM_ENABLE_PROJECTS=clang \
+          -DLLVM_ENABLE_PROJECTS="clang;compiler-rt" \
           -DCLANG_ENABLE_ARCMT=false \
           -DCLANG_ENABLE_STATIC_ANALYZER=false \
           -DCLANG_BUILD_EXAMPLES=false \
@@ -81,7 +86,7 @@ runs:
     - name: Clang Unit Tests
       uses: ./.github/actions/build-test
       with:
-        targets: ClangUnitTests clang
+        targets: clang-test-depends clang
         path: ${{env.CLANG_PATH}}/test 
         include: Clang-Unit.*(${{inputs.include-only}})
         exclude: ${{inputs.exclude-reg}}
@@ -93,5 +98,39 @@ runs:
         path: ${{env.CLANG_PATH}}/test 
         include: ${{inputs.include-only}}
         exclude: Clang-Unit
+    - name: Configure Compiler-RT Build
+      working-directory: ${{env.COMPILER_RT_BUILD_PATH}}
+      shell: bash
+      env:
+        TARGETS: ${{ inputs.targets }}
+        DEFAULT_TARGET: ${{ inputs.default-target }}
+        CFLAGS: ${{inputs.compiler-rt-flags}}
+      run: |
+        cmake $GITHUB_WORKSPACE/$COMPILER_RT_PATH \
+          -DCOMPILER_RT_INCLUDE_TESTS=ON \
+          -DCOMPILER_RT_BUILD_BUILTINS=ON \
+          -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+          -DCOMPILER_RT_BUILD_MEMPROF=OFF \
+          -DCOMPILER_RT_BUILD_PROFILE=OFF \
+          -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+          -DCOMPILER_RT_BUILD_XRAY=OFF \
+          -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+          -DCOMPILER_RT_TEST_COMPILER="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang" \
+          -DLLVM_CONFIG_PATH="$GITHUB_WORKSPACE/$BUILD_PATH/bin/llvm-config" \
+          -DCMAKE_C_COMPILER="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang" \
+          -DCMAKE_CXX_COMPILER="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang++" \
+          -DCMAKE_C_COMPILER_TARGET="$DEFAULT_TARGET" \
+          -DCMAKE_C_FLAGS="$CFLAGS" \
+          -DCMAKE_CXX_FLAGS="$CFLAGS"        
+    - name: Build Compiler-RT
+      working-directory: ${{env.COMPILER_RT_BUILD_PATH}}
+      shell: bash
+      run: make $J    
+    - name: Test Compiler-RT
+      env:
+        TEST_FOLDER: ${{ inputs.compiler-rt-tests }}
+      working-directory: ${{env.COMPILER_RT_BUILD_PATH}}
+      shell: bash
+      run: $GITHUB_WORKSPACE/$BUILD_PATH/bin/llvm-lit test/builtins/Unit/$TEST_FOLDER -v
     
     
