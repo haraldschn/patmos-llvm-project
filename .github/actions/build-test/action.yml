@@ -47,6 +47,6 @@ runs:
           echo "Filter: $FILTER"
           PRE_FILTER="--filter"
         fi
-        ./bin/llvm-lit -v "$GITHUB_WORKSPACE/$TEST_PATH" "$PRE_FILTER" "$FILTER" $LIT_ARGS
+        ./bin/llvm-lit -v $GITHUB_WORKSPACE/$TEST_PATH "$PRE_FILTER" "$FILTER" $LIT_ARGS
     
     
