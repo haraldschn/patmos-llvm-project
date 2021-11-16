@@ -57,7 +57,7 @@ If you need to work on Compiler-RT, you can do the following (from the root fold
 ```
 mkdir -p build-compiler-rt
 cd build-compiler-rt
-cmake ../compiler-rt -DCOMPILER_RT_INCLUDE_TESTS=ON -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCOMPILER_RT_TEST_COMPILER="$(pwd)/../build/bin/clang" -DLLVM_CONFIG_PATH="$(pwd)/../build/bin/llvm-config" -DCMAKE_C_COMPILER="$(pwd)/../build/bin/clang" -DCMAKE_C_COMPILER_TARGET="patmos-unknown-unknown-elf" -DCMAKE_C_FLAGS="--emit-static-lib -nodefaultlibs" -DCMAKE_CXX_FLAGS="--emit-static-lib -nodefaultlibs"
+cmake ../compiler-rt -DCOMPILER_RT_INCLUDE_TESTS=ON -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCOMPILER_RT_TEST_COMPILER="$(pwd)/../build/bin/clang" -DLLVM_CONFIG_PATH="$(pwd)/../build/bin/llvm-config" -DCMAKE_C_COMPILER="$(pwd)/../build/bin/clang" -DCMAKE_C_COMPILER_TARGET="patmos-unknown-unknown-elf" -DCMAKE_C_FLAGS="-c" -DCMAKE_CXX_FLAGS="-c" -DCMAKE_SIZEOF_VOID_P=4
 make -j
 ```
 
