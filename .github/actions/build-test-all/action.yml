@@ -24,7 +24,7 @@ inputs:
   compiler-rt-flags:
     description: 'Flags to use when compiling compiler-rt'
     required: true
-    default: '--emit-static-lib -nodefaultlibs'
+    default: '-c'
   compiler-rt-tests:
     description: 'Which folder under build-compiler-rt/test/builtins/Unit/ to test'
     required: true
@@ -122,7 +122,8 @@ runs:
           -DCMAKE_CXX_COMPILER="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang++" \
           -DCMAKE_C_COMPILER_TARGET="$DEFAULT_TARGET" \
           -DCMAKE_C_FLAGS="$CFLAGS" \
-          -DCMAKE_CXX_FLAGS="$CFLAGS"        
+          -DCMAKE_CXX_FLAGS="$CFLAGS" \
+          -DCMAKE_SIZEOF_VOID_P=4
     - name: Build Compiler-RT
       working-directory: ${{env.COMPILER_RT_BUILD_PATH}}
       shell: bash
