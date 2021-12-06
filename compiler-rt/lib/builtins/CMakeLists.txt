@@ -674,8 +674,10 @@ set(patmos_SOURCES
   lshrdi3.c
   moddi3.c
   modsi3.c
+  muldc3.c
   muldf3.c
   muldi3.c
+  mulsc3.c
   mulsf3.c
   subdf3.c
   subsf3.c
