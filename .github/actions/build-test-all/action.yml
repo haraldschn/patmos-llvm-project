@@ -38,6 +38,7 @@ runs:
       run: |
         mkdir -p $BUILD_PATH
         mkdir -p $COMPILER_RT_BUILD_PATH
+        mkdir -p $NEWLIB_BUILD_PATH
     - run: echo "::group::Configure LLVM Build"
       shell: bash
     - working-directory: ${{env.BUILD_PATH}}
@@ -133,5 +134,30 @@ runs:
       working-directory: ${{env.COMPILER_RT_BUILD_PATH}}
       shell: bash
       run: $GITHUB_WORKSPACE/$BUILD_PATH/bin/llvm-lit test/builtins/Unit/$TEST_FOLDER -v
+    - name: Download Newlib
+      env:
+        NEWLIB_COMMIT: 9cb98eb157a18fde859c8364e352cc1422dc0013
+      shell: bash
+      run: |
+        git clone https://github.com/t-crest/patmos-newlib ${{env.NEWLIB_PATH}}
+        cd ${{env.NEWLIB_PATH}}
+        git checkout $NEWLIB_COMMIT
+    # Builds newlib to Patmos assembly (instead of bitcode)
+    # to ensure that it compiles successfully
+    - name: Test-Build Newlib
+      working-directory: ${{env.NEWLIB_BUILD_PATH}}
+      shell: bash
+      run: |
+        $GITHUB_WORKSPACE/$NEWLIB_PATH/configure --target=patmos-unknown-unknown-elf AR_FOR_TARGET=ar CC_FOR_TARGET="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang" CFLAGS_FOR_TARGET="-target patmos-unknown-unknown-elf -O2 -D__GLIBC_USE\(...\)=0" RANLIB_FOR_TARGET=ranlib LD_FOR_TARGET="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang"
+        make $J
+        rm -rf *
+    # Build newlib properly to LLVM-IR
+    - name: Build Newlib
+      working-directory: ${{env.NEWLIB_BUILD_PATH}}
+      shell: bash
+      run: |
+        $GITHUB_WORKSPACE/$NEWLIB_PATH/configure --target=patmos-unknown-unknown-elf AR_FOR_TARGET=ar CC_FOR_TARGET="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang" CFLAGS_FOR_TARGET="-target patmos-unknown-unknown-elf -O2 -emit-llvm -D__GLIBC_USE\(...\)=0" RANLIB_FOR_TARGET=ranlib LD_FOR_TARGET="$GITHUB_WORKSPACE/$BUILD_PATH/bin/clang"
+        make $J
+            
     
     
