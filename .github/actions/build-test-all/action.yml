@@ -30,7 +30,7 @@ inputs:
     required: true
     default: 'patmos'
   newlib-enable:
-    description: 'Whether Newlib should compiled.
+    description: 'Whether Newlib should compiled.'
     required: true
     default: true
         
