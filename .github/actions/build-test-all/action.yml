@@ -29,6 +29,10 @@ inputs:
     description: 'Which folder under build-compiler-rt/test/builtins/Unit/ to test'
     required: true
     default: 'patmos'
+  newlib-enable:
+    description: 'Whether Newlib should compiled.
+    required: true
+    default: true
         
 runs:
   using: "composite"
@@ -135,16 +139,18 @@ runs:
       shell: bash
       run: $GITHUB_WORKSPACE/$BUILD_PATH/bin/llvm-lit test/builtins/Unit/$TEST_FOLDER -v
     - name: Download Newlib
+      if: ${{ inputs.newlib-enable }}
       env:
-        NEWLIB_COMMIT: 9cb98eb157a18fde859c8364e352cc1422dc0013
+        NEWLIB_COMMIT: 3292aef3c57c3597eea490bbf3040f8ec7d28917
       shell: bash
       run: |
-        git clone https://github.com/t-crest/patmos-newlib ${{env.NEWLIB_PATH}}
+        git clone https://github.com/emoun/patmos-newlib ${{env.NEWLIB_PATH}}
         cd ${{env.NEWLIB_PATH}}
         git checkout $NEWLIB_COMMIT
     # Builds newlib to Patmos assembly (instead of bitcode)
     # to ensure that it compiles successfully
     - name: Test-Build Newlib
+      if: ${{ inputs.newlib-enable }}
       working-directory: ${{env.NEWLIB_BUILD_PATH}}
       shell: bash
       run: |
@@ -153,6 +159,7 @@ runs:
         rm -rf *
     # Build newlib properly to LLVM-IR
     - name: Build Newlib
+      if: ${{ inputs.newlib-enable }}
       working-directory: ${{env.NEWLIB_BUILD_PATH}}
       shell: bash
       run: |
