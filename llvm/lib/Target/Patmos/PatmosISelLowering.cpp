@@ -62,7 +62,7 @@ PatmosTargetLowering::PatmosTargetLowering(const PatmosTargetMachine &tm,
   setBooleanContents(ZeroOrOneBooleanContent);
 
   // Allow rather aggressive inlining of memcpy and friends
-  MaxStoresPerMemset = 32;
+  MaxStoresPerMemset = 512;
   MaxStoresPerMemsetOptSize = 8;
   MaxStoresPerMemcpy = 16;
   MaxStoresPerMemcpyOptSize = 4;
