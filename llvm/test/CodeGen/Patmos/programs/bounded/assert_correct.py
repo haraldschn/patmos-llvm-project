@@ -114,6 +114,8 @@ def execute_and_stat(program, args):
         sys.stderr.write(str(pasim_result.returncode) + "\n")
         sys.stderr.write("--------------------- stdout ---------------------\n")
         sys.stderr.write(program_output + "\n")
+        sys.stderr.write("--------------------- stderr ---------------------\n")
+        sys.stderr.write(pasim_stats + "\n")
         sys.stderr.write("--------------------------------------------------\n")
         return True, ""
     

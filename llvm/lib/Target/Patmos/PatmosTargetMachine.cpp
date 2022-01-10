@@ -110,6 +110,7 @@ namespace {
     /// addPreISelPasses - This method should add any "last minute" LLVM->LLVM
     /// passes (which are run just before instruction selector).
     bool addPreISel() override {
+      addPass(createPatmosIntrinsicEliminationPass());
       if (PatmosSinglePathInfo::isEnabled()) {
         // Single-path transformation requires a single exit node
         addPass(createUnifyFunctionExitNodesPass());
